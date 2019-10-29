@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">GnssRAW</string>
+    <string name="raw_tab">Raw Measurements</string>
+    <string name="plot_tab">Plot</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Coming soon...</string>
+</resources>
