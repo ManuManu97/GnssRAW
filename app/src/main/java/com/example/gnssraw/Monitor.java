@@ -20,6 +20,7 @@ public class Monitor {
 
     public static final String TAG = "Monitor";
     private Context myContext;
+    public static int REQUEST_TIME = 1000;
 
     private List<IListener> RawLoggers;
 
@@ -127,12 +128,14 @@ public class Monitor {
                     .checkSelfPermission(myContext,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 7000, 0.0f, myLocationListener);
+        myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, REQUEST_TIME, 0.0f, myLocationListener);
         myLocationManager.registerGnssMeasurementsCallback(GnssListener);
     }
 
     public void stopRegister(){
 
+
         myLocationManager.removeUpdates(myLocationListener);
+        myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
     }
 }
