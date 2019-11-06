@@ -30,6 +30,9 @@ public class FileLogger implements IListener {
     private Context myContext;
     private final String DIR_NAME = "GnssManu";
     private final String F_NAME = "RawManu";
+    private static final String COMMENT = "# ";
+    private static final char RECORD_DELIMITER = ',';
+    private static final String VERSION_TAG = "Version: ";
 
     public FileLogger(Context context){
         myContext = context;
@@ -64,17 +67,57 @@ public class FileLogger implements IListener {
             return;
         }
         try {
-        currentFileWriter.write(
-                "Raw,ElapsedRealtimeMillis,TimeNanos,LeapSecond,TimeUncertaintyNanos,FullBiasNanos,"
-                        + "BiasNanos,BiasUncertaintyNanos,DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,"
-                        + "HardwareClockDiscontinuityCount,Svid,TimeOffsetNanos,State,ReceivedSvTimeNanos,"
-                        + "ReceivedSvTimeUncertaintyNanos,Cn0DbHz,PseudorangeRateMetersPerSecond,"
-                        + "PseudorangeRateUncertaintyMetersPerSecond,"
-                        + "AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,"
-                        + "AccumulatedDeltaRangeUncertaintyMeters,CarrierFrequencyHz,CarrierCycles,"
-                        + "CarrierPhase,CarrierPhaseUncertainty,MultipathIndicator,SnrInDb,"
-                        + "ConstellationType,AgcDb,CarrierFrequencyHz");
-        currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write("Header Description:");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write(VERSION_TAG);
+            String manufacturer = Build.MANUFACTURER;
+            String model = Build.MODEL;
+            String fileVersion =
+                    myContext.getString(R.string.version_of_app)
+                            + " Platform: "
+                            + Build.VERSION.RELEASE
+                            + " "
+                            + "Manufacturer: "
+                            + manufacturer
+                            + " "
+                            + "Model: "
+                            + model;
+            currentFileWriter.write(fileVersion);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write(
+                    "Raw,ElapsedRealtimeMillis,TimeNanos,LeapSecond,TimeUncertaintyNanos,FullBiasNanos,"
+                            + "BiasNanos,BiasUncertaintyNanos,DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,"
+                            + "HardwareClockDiscontinuityCount,Svid,TimeOffsetNanos,State,ReceivedSvTimeNanos,"
+                            + "ReceivedSvTimeUncertaintyNanos,Cn0DbHz,PseudorangeRateMetersPerSecond,"
+                            + "PseudorangeRateUncertaintyMetersPerSecond,"
+                            + "AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,"
+                            + "AccumulatedDeltaRangeUncertaintyMeters,CarrierFrequencyHz,CarrierCycles,"
+                            + "CarrierPhase,CarrierPhaseUncertainty,MultipathIndicator,SnrInDb,"
+                            + "ConstellationType,AgcDb,CarrierFrequencyHz");
+            currentFileWriter.newLine();
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write(
+                    "Fix,Provider,Latitude,Longitude,Altitude,Speed,Accuracy,(UTC)TimeInMs");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write("Nav,Svid,Type,Status,MessageId,Sub-messageId,Data(Bytes)");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
 
         myFile = curFile;
         myFileWriter = currentFileWriter;

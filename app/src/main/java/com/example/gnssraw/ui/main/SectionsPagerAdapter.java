@@ -22,6 +22,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.raw_tab, R.string.plot_tab};
     private final Context mContext;
+    RawFragment myRawFragment = new RawFragment();
+    PlotFragment myPlotFragment = new PlotFragment();
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -35,9 +37,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         // Return a PlaceholderFragment (defined as a static inner class below).
         switch(position){
             case 0:
-                return new RawFragment();
+                return myRawFragment;
             case 1:
-                return new PlotFragment();
+                return myPlotFragment;
             default:
                 return null;
         }

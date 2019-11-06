@@ -3,6 +3,8 @@ package com.example.gnssraw;
 import android.location.GnssStatus;
 import android.widget.TextView;
 
+
+//non importante per adesso...
 public class RawGnssStatus  extends GnssStatus.Callback
 {
     TextView myText;

@@ -4,6 +4,8 @@ package com.example.gnssraw;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -14,6 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.util.Objects;
+
 
 public class RawFragment extends Fragment {
 
@@ -21,6 +25,7 @@ public class RawFragment extends Fragment {
     private ScrollView mScrollTextView;
     private UILogger myUILogger;
     private FileLogger myFileLogger;
+    private Monitor myMonitor;
 
     public RawFragment() {
 
@@ -33,7 +38,7 @@ public class RawFragment extends Fragment {
         mScrollTextView = newView.findViewById(R.id.RawscrollView);
         myUILogger = new UILogger(mRawTextView, this);
         myFileLogger = new FileLogger(this.getContext());
-        final Monitor myMonitor = new Monitor(this.getContext(), myUILogger,myFileLogger);
+        myMonitor = new Monitor(Objects.requireNonNull(this.getContext()), myUILogger,myFileLogger);
         Button start = (Button) newView.findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,6 +65,7 @@ public class RawFragment extends Fragment {
         return newView;
     }
 
+
     public synchronized void writeOnTextFragment(final String text) {
         final StringBuilder builder = new StringBuilder();
         builder.append(text).append("\n");
@@ -82,4 +88,10 @@ public class RawFragment extends Fragment {
                     }
                 });
     }
+
+    public Monitor getMonitor(){
+        return myMonitor;
+    }
+
+
 }

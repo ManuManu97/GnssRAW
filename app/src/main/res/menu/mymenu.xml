@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item
+        android:id="@+id/acquisition_rate"
+        android:enabled="true"
+        android:menuCategory="container"
+        android:title="@string/acquisition_rate"
+        android:visible="true"
+        app:showAsAction="never"
+        android:iconTint="@color/whiteMan"/>
+
+    <item
+        android:id="@+id/settings"
+        android:enabled="true"
+        android:menuCategory="container"
+        android:title="settings"
+        android:visible="true"
+        app:showAsAction="never"
+        android:iconTint="@color/whiteMan"/>
+</menu>

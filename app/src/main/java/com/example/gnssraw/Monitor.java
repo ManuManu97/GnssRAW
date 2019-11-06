@@ -20,7 +20,7 @@ public class Monitor {
 
     public static final String TAG = "Monitor";
     private Context myContext;
-    public static int REQUEST_TIME = 1000;
+    private int REQUEST_TIME = 1000;
 
     private List<IListener> RawLoggers;
 
@@ -136,6 +136,15 @@ public class Monitor {
 
 
         myLocationManager.removeUpdates(myLocationListener);
-        myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
+        //myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
     }
+
+    public void setRequestTime(int input){
+        this.REQUEST_TIME = input * 1000;
+    }
+
+    public int PrintReQuestTime(){
+        return REQUEST_TIME;
+    }
+
 }

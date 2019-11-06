@@ -1,22 +1,37 @@
 package com.example.gnssraw;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.gnssraw.ui.main.SectionsPagerAdapter;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -26,16 +41,50 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
     private static final int LOCATION_REQUEST_ID = 1;
+    private SectionsPagerAdapter sectionsPagerAdapter;
+    Point p;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
         checkPermissions();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        int[] location = new int[2];
+        MenuItem button = (MenuItem) findViewById(R.id.acquisition_rate);
+
+        // Get the x, y location and store it in the location[] array
+        // location[0] = x, location[1] = y.
+
+        //Initialize the Point with x, and y positions
+        p = new Point();
+        p.x = location[0];
+        p.y = location[1];
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.mymenu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.acquisition_rate) {
+            showPopup(MainActivity.this, p);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -74,18 +123,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkPermissions(){
 
-//        int permissionCheck = ContextCompat.checkSelfPermission(this, REQUIRED_PERMISSIONS[0]);
-//
-//        if(permissionCheck != PackageManager.PERMISSION_GRANTED){
-//            if(ActivityCompat.shouldShowRequestPermissionRationale(this, REQUIRED_PERMISSIONS[0])){
-//                showExplanation("Permission Needed", "Rationale", REQUIRED_PERMISSIONS[0], LOCATION_REQUEST_ID);
-//            }else{
-//                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, LOCATION_REQUEST_ID);
-//            }
-//        }else{
-//            Toast.makeText(this,"BELLA", Toast.LENGTH_SHORT).show();
-//        }
-
         for(String permission : REQUIRED_PERMISSIONS){
             int permissionCheck = ContextCompat.checkSelfPermission(this, permission);
 
@@ -101,5 +138,53 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void showPopup(final Activity context, Point p) {
+        int popupWidth = 500;
+        int popupHeight = 500;
 
+        // Inflate the popup_layout.xml
+        LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.popup);
+        LayoutInflater layoutInflater = (LayoutInflater) context
+                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View layout = layoutInflater.inflate(R.layout.acquisition_rate_popup, viewGroup);
+
+        // Creating the PopupWindow
+        final PopupWindow popup = new PopupWindow(context);
+        popup.setContentView(layout);
+        popup.setWidth(popupWidth);
+        popup.setHeight(popupHeight);
+        popup.setFocusable(true);
+
+        // Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
+        int OFFSET_X = 325;
+        int OFFSET_Y = 700;
+
+        // Clear the default translucent background
+        popup.setBackgroundDrawable(new BitmapDrawable());
+
+        // Displaying the popup at the specified location, + offsets.
+        popup.showAtLocation(layout, Gravity.NO_GRAVITY, OFFSET_X,  OFFSET_Y);
+
+        // Getting a reference to Close button, and close the popup when clicked.
+        Button close = (Button) layout.findViewById(R.id.set_ar_button);
+        final TextView setterAR = layout.findViewById(R.id.number_for_AR);
+        setterAR.setText("");
+        close.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
+                Monitor aux = temp.getMonitor();
+                try {
+                    int i = Integer.parseInt(setterAR.getText().toString());
+                    aux.setRequestTime(i);
+                    Toast.makeText(getApplicationContext(),""+aux.PrintReQuestTime()/1000+" Seconds", Toast.LENGTH_SHORT).show();
+                }catch (Exception e) {
+                    Toast.makeText(getApplicationContext(),"ERROR "+ e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
+                popup.dismiss();
+            }
+        });
+    }
 }
