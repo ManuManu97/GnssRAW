@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -26,6 +27,7 @@ public class RawFragment extends Fragment {
     private UILogger myUILogger;
     private FileLogger myFileLogger;
     private Monitor myMonitor;
+    private ServerLogger myServerLogger;
 
     public RawFragment() {
 
@@ -38,6 +40,7 @@ public class RawFragment extends Fragment {
         mScrollTextView = newView.findViewById(R.id.RawscrollView);
         myUILogger = new UILogger(mRawTextView, this);
         myFileLogger = new FileLogger(this.getContext());
+        myServerLogger = new ServerLogger();
         myMonitor = new Monitor(Objects.requireNonNull(this.getContext()), myUILogger,myFileLogger);
         Button start = (Button) newView.findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
@@ -93,5 +96,11 @@ public class RawFragment extends Fragment {
         return myMonitor;
     }
 
+    public void ServerConnect(){
+        myMonitor.addServerCommunication(myUILogger,myFileLogger,myServerLogger);
+    }
 
+    public void ServerDisconnect(){
+        myMonitor.removeServerCommunication(myUILogger,myFileLogger);
+    }
 }

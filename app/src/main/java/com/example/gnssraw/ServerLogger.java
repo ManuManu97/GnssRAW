@@ -9,13 +9,22 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 
-import org.zeromq.SocketType;
-import org.zeromq.ZMQ;
-import org.zeromq.ZContext;
+import org.jeromq.ZMQ;
 
 
 //to be done
 public class ServerLogger implements IListener{
+
+
+    private ZMQ.Context context;
+    private ZMQ.Socket socket;
+
+    public ServerLogger() {
+        context = ZMQ.context(1);
+        socket = context.socket(ZMQ.REQ);
+        socket.connect("tcp://130.251.250.204:5555");
+    }
+
     @Override
     public void onLocationChanged(Location location) {
 
@@ -38,17 +47,11 @@ public class ServerLogger implements IListener{
 
     @Override
     public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
-        try (ZContext context = new ZContext()) {
-           // System.out.println("Connecting to hello world server");
-
-            //  Socket to talk to server
-            ZMQ.Socket socket = context.createSocket(SocketType.REQ);
-            socket.connect("tcp://localhost:5555");
 
                 for (GnssMeasurement measurement: eventArgs.getMeasurements()) {
                     String measurementStream =
                             String.format(
-                                    "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                                    "Raw,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                                     measurement.getSvid(),
                                     measurement.getTimeOffsetNanos(),
                                     measurement.getState(),
@@ -75,16 +78,11 @@ public class ServerLogger implements IListener{
                                             ? measurement.getAutomaticGainControlLevelDb()
                                             : "",
                                     measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "");
-                    socket.send(measurementStream.getBytes(ZMQ.CHARSET), 0);
+                    socket.send(measurementStream.getBytes(), 0);
+                    System.out.println(new String(socket.recv(0)));
                 }
-
-
-               /* byte[] reply = socket.recv(0);
-                System.out.println(
-                        "Received " + new String(reply, ZMQ.CHARSET) + " " +
-                                requestNbr
-                );*/
-        }
+        //socket.close();
+        //context.term();
     }
 
     @Override

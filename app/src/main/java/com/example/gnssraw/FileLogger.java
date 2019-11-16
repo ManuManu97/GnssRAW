@@ -28,8 +28,8 @@ public class FileLogger implements IListener {
     File myFile;
     BufferedWriter myFileWriter;
     private Context myContext;
-    private final String DIR_NAME = "GnssManu";
-    private final String F_NAME = "RawManu";
+    private final String DIR_NAME = "GnssRAW";
+    private final String F_NAME = "GNSS_log_RAW_";
     private static final String COMMENT = "# ";
     private static final char RECORD_DELIMITER = ',';
     private static final String VERSION_TAG = "Version: ";
@@ -54,7 +54,7 @@ public class FileLogger implements IListener {
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         Date now = new Date();
-        String fName =  String.format("%s_%s.csv", F_NAME , formatter.format(now));
+        String fName =  String.format("%s_%s.txt", F_NAME , formatter.format(now));
 
         File curFile = new File(baseDirectory, fName);
 
@@ -70,7 +70,7 @@ public class FileLogger implements IListener {
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
-            currentFileWriter.write("Header Description:");
+            currentFileWriter.write("Header Description: GnssRAW.apk");
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
@@ -157,12 +157,10 @@ public class FileLogger implements IListener {
             return;
         }
         GnssClock gnssClock = eventArgs.getClock();
-        for (GnssMeasurement measurement : eventArgs.getMeasurements()) {
             try {
-                writeGnssMeasurementToFile(gnssClock, measurement);
+                writeGnssMeasurementToFile(gnssClock, eventArgs);
             } catch (IOException e) {
             }
-        }
     }
 
     @Override
@@ -200,14 +198,14 @@ public class FileLogger implements IListener {
 
     }
 
-    private void writeGnssMeasurementToFile(GnssClock clock, GnssMeasurement measurement)
+    private void writeGnssMeasurementToFile(GnssClock clock, GnssMeasurementsEvent measurements)
             throws IOException {
         String clockStream =
                 String.format(
-                        "Raw,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                        "Clk,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
                         SystemClock.elapsedRealtime(),
-                        clock.getTimeNanos(),
                         clock.hasLeapSecond() ? clock.getLeapSecond() : "",
+                        clock.getTimeNanos(),
                         clock.hasTimeUncertaintyNanos() ? clock.getTimeUncertaintyNanos() : "",
                         clock.getFullBiasNanos(),
                         clock.hasBiasNanos() ? clock.getBiasNanos() : "",
@@ -216,40 +214,39 @@ public class FileLogger implements IListener {
                         clock.hasDriftUncertaintyNanosPerSecond()
                                 ? clock.getDriftUncertaintyNanosPerSecond()
                                 : "",
-                        clock.getHardwareClockDiscontinuityCount() + ",");
+                        clock.getHardwareClockDiscontinuityCount(),
+                        SystemClock.elapsedRealtime());
         myFileWriter.write(clockStream);
-
-        String measurementStream =
-                String.format(
-                        "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                        measurement.getSvid(),
-                        measurement.getTimeOffsetNanos(),
-                        measurement.getState(),
-                        measurement.getReceivedSvTimeNanos(),
-                        measurement.getReceivedSvTimeUncertaintyNanos(),
-                        measurement.getCn0DbHz(),
-                        measurement.getPseudorangeRateMetersPerSecond(),
-                        measurement.getPseudorangeRateUncertaintyMetersPerSecond(),
-                        measurement.getAccumulatedDeltaRangeState(),
-                        measurement.getAccumulatedDeltaRangeMeters(),
-                        measurement.getAccumulatedDeltaRangeUncertaintyMeters(),
-                        measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "",
-                        measurement.hasCarrierCycles() ? measurement.getCarrierCycles() : "",
-                        measurement.hasCarrierPhase() ? measurement.getCarrierPhase() : "",
-                        // se ce l'ha lo inserisce altrimenti inserisce "" in questo campo
-                        measurement.hasCarrierPhaseUncertainty()
-                                ? measurement.getCarrierPhaseUncertainty()
-                                : "",
-                        measurement.getMultipathIndicator(),
-                        measurement.hasSnrInDb() ? measurement.getSnrInDb() : "",
-                        measurement.getConstellationType(),
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                                && measurement.hasAutomaticGainControlLevelDb()
-                                ? measurement.getAutomaticGainControlLevelDb()
-                                : "",
-                        measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "");
-        myFileWriter.write(measurementStream);
         myFileWriter.newLine();
+
+        for (GnssMeasurement measurement : measurements.getMeasurements()) {
+            String measurementStream =
+                    String.format(
+                            "Raw,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                            measurement.getConstellationType(),
+                            measurement.getSvid(),
+                            measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "",
+                            measurement.getTimeOffsetNanos(),
+                            measurement.getState(),
+                            measurement.getReceivedSvTimeNanos(),
+                            measurement.getReceivedSvTimeUncertaintyNanos(),
+                            measurement.getPseudorangeRateMetersPerSecond(),
+                            measurement.getPseudorangeRateUncertaintyMetersPerSecond(),
+                            measurement.getAccumulatedDeltaRangeState(),
+                            measurement.getAccumulatedDeltaRangeMeters(),
+                            measurement.getAccumulatedDeltaRangeUncertaintyMeters(),
+                            measurement.getCn0DbHz(),
+                            measurement.getMultipathIndicator(),
+                            measurement.hasSnrInDb() ? measurement.getSnrInDb() : "",
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                                    && measurement.hasAutomaticGainControlLevelDb()
+                                    ? measurement.getAutomaticGainControlLevelDb()
+                                    : "",
+                            measurement.getSvid());
+            myFileWriter.write(measurementStream);
+            myFileWriter.newLine();
+        }
+
         myFileWriter.flush();
     }
 

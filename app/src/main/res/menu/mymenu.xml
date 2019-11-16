@@ -4,21 +4,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+
     <item
         android:id="@+id/acquisition_rate"
         android:enabled="true"
         android:menuCategory="container"
         android:title="@string/acquisition_rate"
-        android:visible="true"
+        android:visible="false"
         app:showAsAction="never"
         android:iconTint="@color/whiteMan"/>
 
     <item
-        android:id="@+id/settings"
+        android:id="@+id/serversetterlogger"
+        android:checkable="true"
+        android:checked="false"
         android:enabled="true"
+        android:iconTint="@color/whiteMan"
         android:menuCategory="container"
-        android:title="settings"
+        android:title="ServerLoggerActive"
         android:visible="true"
-        app:showAsAction="never"
-        android:iconTint="@color/whiteMan"/>
+        app:showAsAction="never" />
+
+
 </menu>

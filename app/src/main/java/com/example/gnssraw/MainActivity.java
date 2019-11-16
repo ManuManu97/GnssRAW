@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
@@ -32,6 +31,7 @@ import android.widget.Toast;
 
 import com.example.gnssraw.ui.main.SectionsPagerAdapter;
 
+import java.util.Arrays;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -84,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
             showPopup(MainActivity.this, p);
             return true;
         }
+        if(id == R.id.serversetterlogger){
+            setServerLoggerStatus(item);
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -128,12 +132,12 @@ public class MainActivity extends AppCompatActivity {
 
             if(permissionCheck != PackageManager.PERMISSION_GRANTED){
                 if(ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
-                    showExplanation("Permission Needed", "Rationale", permission, LOCATION_REQUEST_ID);
+                    showExplanation("Permessi Negati", "Permessi Negati", permission, LOCATION_REQUEST_ID);
                 }else{
                     ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, LOCATION_REQUEST_ID);
                 }
             }else{
-                Toast.makeText(this,"BELLA", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Permessi Garantiti ", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -154,18 +158,7 @@ public class MainActivity extends AppCompatActivity {
         popup.setWidth(popupWidth);
         popup.setHeight(popupHeight);
         popup.setFocusable(true);
-
-        // Some offset to align the popup a bit to the right, and a bit down, relative to button's position.
-        int OFFSET_X = 325;
-        int OFFSET_Y = 700;
-
-        // Clear the default translucent background
-        popup.setBackgroundDrawable(new BitmapDrawable());
-
-        // Displaying the popup at the specified location, + offsets.
-        popup.showAtLocation(layout, Gravity.NO_GRAVITY, OFFSET_X,  OFFSET_Y);
-
-        // Getting a reference to Close button, and close the popup when clicked.
+        popup.showAtLocation(layout, Gravity.CENTER, 0,  0);
         Button close = (Button) layout.findViewById(R.id.set_ar_button);
         final TextView setterAR = layout.findViewById(R.id.number_for_AR);
         setterAR.setText("");
@@ -186,5 +179,20 @@ public class MainActivity extends AppCompatActivity {
                 popup.dismiss();
             }
         });
+    }
+
+    public void setServerLoggerStatus(MenuItem item){
+        RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
+        if(!item.isChecked()){
+            temp.ServerConnect();
+            item.setChecked(true);
+        }else{
+            temp.ServerDisconnect();
+            item.setChecked(false);
+        }
+
+        for (IListener list:temp.getMonitor().getListeners()) {
+            System.out.println(list);
+        }
     }
 }

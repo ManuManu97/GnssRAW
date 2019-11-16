@@ -134,9 +134,8 @@ public class Monitor {
 
     public void stopRegister(){
 
-
         myLocationManager.removeUpdates(myLocationListener);
-        //myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
+        myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
     }
 
     public void setRequestTime(int input){
@@ -145,6 +144,19 @@ public class Monitor {
 
     public int PrintReQuestTime(){
         return REQUEST_TIME;
+    }
+
+    public List<IListener> getListeners(){
+        return this.RawLoggers;
+    }
+
+    public void addServerCommunication(IListener... loggers){
+
+        this.RawLoggers = Arrays.asList(loggers);
+    }
+
+    public void removeServerCommunication(IListener... loggers){
+        this.RawLoggers = Arrays.asList(loggers);
     }
 
 }
