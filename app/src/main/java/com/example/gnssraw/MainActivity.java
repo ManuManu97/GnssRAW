@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     };
     private static final int LOCATION_REQUEST_ID = 1;
     private SectionsPagerAdapter sectionsPagerAdapter;
-    Point p;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,20 +58,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        int[] location = new int[2];
-        MenuItem button = (MenuItem) findViewById(R.id.acquisition_rate);
-
-        // Get the x, y location and store it in the location[] array
-        // location[0] = x, location[1] = y.
-
-        //Initialize the Point with x, and y positions
-        p = new Point();
-        p.x = location[0];
-        p.y = location[1];
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.mymenu, menu);
         return super.onCreateOptionsMenu(menu);
@@ -80,10 +66,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.acquisition_rate) {
-            showPopup(MainActivity.this, p);
-            return true;
-        }
         if(id == R.id.serversetterlogger){
             setServerLoggerStatus(item);
             return true;
@@ -142,17 +124,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showPopup(final Activity context, Point p) {
+  /*  private void showPopup(final Activity context) {
         int popupWidth = 500;
         int popupHeight = 500;
 
-        // Inflate the popup_layout.xml
         LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.popup);
         LayoutInflater layoutInflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = layoutInflater.inflate(R.layout.acquisition_rate_popup, viewGroup);
 
-        // Creating the PopupWindow
         final PopupWindow popup = new PopupWindow(context);
         popup.setContentView(layout);
         popup.setWidth(popupWidth);
@@ -179,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 popup.dismiss();
             }
         });
-    }
+    }*/
 
     public void setServerLoggerStatus(MenuItem item){
         RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
@@ -189,10 +169,6 @@ public class MainActivity extends AppCompatActivity {
         }else{
             temp.ServerDisconnect();
             item.setChecked(false);
-        }
-
-        for (IListener list:temp.getMonitor().getListeners()) {
-            System.out.println(list);
         }
     }
 }

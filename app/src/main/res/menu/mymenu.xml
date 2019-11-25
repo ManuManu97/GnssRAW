@@ -21,7 +21,7 @@
         android:enabled="true"
         android:iconTint="@color/whiteMan"
         android:menuCategory="container"
-        android:title="ServerLoggerActive"
+        android:title="@string/serverloggeractive"
         android:visible="true"
         app:showAsAction="never" />
 

@@ -1,11 +1,10 @@
 package com.example.gnssraw;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -16,7 +15,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -28,6 +28,7 @@ public class RawFragment extends Fragment {
     private FileLogger myFileLogger;
     private Monitor myMonitor;
     private ServerLogger myServerLogger;
+    private SensorMonitor mySensorMonitor;
 
     public RawFragment() {
 
@@ -40,14 +41,17 @@ public class RawFragment extends Fragment {
         mScrollTextView = newView.findViewById(R.id.RawscrollView);
         myUILogger = new UILogger(mRawTextView, this);
         myFileLogger = new FileLogger(this.getContext());
-        myServerLogger = new ServerLogger();
         myMonitor = new Monitor(Objects.requireNonNull(this.getContext()), myUILogger,myFileLogger);
+        mySensorMonitor = new SensorMonitor(this.getContext());
         Button start = (Button) newView.findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 myMonitor.Register();
-                myFileLogger.CreateLoggerFile();
+                myFileLogger.CreateRAWLoggerFile();
+                myFileLogger.CreateFIXLoggerFile();
+                myFileLogger.CreateNAVLoggerFile();
+                mySensorMonitor.Register();
             }
         });
         Button stop = (Button) newView.findViewById(R.id.stopButton);
@@ -55,6 +59,7 @@ public class RawFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 myMonitor.stopRegister();
+                mySensorMonitor.stopRegister();
             }
         });
 
@@ -92,15 +97,20 @@ public class RawFragment extends Fragment {
                 });
     }
 
-    public Monitor getMonitor(){
+    private Monitor getMonitor(){
         return myMonitor;
     }
 
-    public void ServerConnect(){
+    void ServerConnect(){
+
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        Date now = new Date();
+        myServerLogger = new ServerLogger(formatter.format(now));
         myMonitor.addServerCommunication(myUILogger,myFileLogger,myServerLogger);
     }
 
-    public void ServerDisconnect(){
+    void ServerDisconnect(){
+        myServerLogger = null;
         myMonitor.removeServerCommunication(myUILogger,myFileLogger);
     }
 }

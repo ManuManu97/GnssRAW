@@ -12,18 +12,14 @@ public interface IListener {
     //LocationListener
     void onLocationChanged(Location location);
 
-
     void onStatusChanged(String s, int i, Bundle bundle);
-
 
     void onProviderEnabled(String s);
 
-
-     void onProviderDisabled(String s);
+    void onProviderDisabled(String s);
 
     //GnssMeasurementEvent.Callback
     void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs);
-
 
     void onStatusChanged(int status);
 
@@ -35,12 +31,9 @@ public interface IListener {
     //GnssStatus.Callback
     void onStarted();
 
-
     void onStopped();
 
-
     void onFirstFix(int ttffMillis);
-
 
     void onSatelliteStatusChanged(GnssStatus status);
 }

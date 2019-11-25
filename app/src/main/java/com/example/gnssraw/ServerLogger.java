@@ -1,6 +1,7 @@
 package com.example.gnssraw;
 
 
+import android.location.GnssClock;
 import android.location.GnssMeasurement;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
@@ -8,8 +9,11 @@ import android.location.GnssStatus;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 
 import org.jeromq.ZMQ;
+
+import java.util.Date;
 
 
 //to be done
@@ -18,11 +22,13 @@ public class ServerLogger implements IListener{
 
     private ZMQ.Context context;
     private ZMQ.Socket socket;
+    String log_date;
 
-    public ServerLogger() {
+    public ServerLogger(String now) {
         context = ZMQ.context(1);
         socket = context.socket(ZMQ.REQ);
-        socket.connect("tcp://130.251.250.204:5555");
+        socket.connect("tcp://192.168.1.187:5555");
+        log_date = now;
     }
 
     @Override
@@ -48,41 +54,54 @@ public class ServerLogger implements IListener{
     @Override
     public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
 
-                for (GnssMeasurement measurement: eventArgs.getMeasurements()) {
-                    String measurementStream =
-                            String.format(
-                                    "Raw,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                                    measurement.getSvid(),
-                                    measurement.getTimeOffsetNanos(),
-                                    measurement.getState(),
-                                    measurement.getReceivedSvTimeNanos(),
-                                    measurement.getReceivedSvTimeUncertaintyNanos(),
-                                    measurement.getCn0DbHz(),
-                                    measurement.getPseudorangeRateMetersPerSecond(),
-                                    measurement.getPseudorangeRateUncertaintyMetersPerSecond(),
-                                    measurement.getAccumulatedDeltaRangeState(),
-                                    measurement.getAccumulatedDeltaRangeMeters(),
-                                    measurement.getAccumulatedDeltaRangeUncertaintyMeters(),
-                                    measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "",
-                                    measurement.hasCarrierCycles() ? measurement.getCarrierCycles() : "",
-                                    measurement.hasCarrierPhase() ? measurement.getCarrierPhase() : "",
-                                    // se ce l'ha lo inserisce altrimenti inserisce "" in questo campo
-                                    measurement.hasCarrierPhaseUncertainty()
-                                            ? measurement.getCarrierPhaseUncertainty()
-                                            : "",
-                                    measurement.getMultipathIndicator(),
-                                    measurement.hasSnrInDb() ? measurement.getSnrInDb() : "",
-                                    measurement.getConstellationType(),
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                                            && measurement.hasAutomaticGainControlLevelDb()
-                                            ? measurement.getAutomaticGainControlLevelDb()
-                                            : "",
-                                    measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "");
-                    socket.send(measurementStream.getBytes(), 0);
-                    System.out.println(new String(socket.recv(0)));
-                }
-        //socket.close();
-        //context.term();
+        String Result = Build.MANUFACTURER + Build.MODEL +log_date.toString()+"#";
+        GnssClock clock = eventArgs.getClock();
+        String clockStream =
+                String.format(
+                        "Clk,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s*",
+                        SystemClock.elapsedRealtime(),
+                        clock.hasLeapSecond() ? clock.getLeapSecond() : "",
+                        clock.getTimeNanos(),
+                        clock.hasTimeUncertaintyNanos() ? clock.getTimeUncertaintyNanos() : "",
+                        clock.getFullBiasNanos(),
+                        clock.hasBiasNanos() ? clock.getBiasNanos() : "",
+                        clock.hasBiasUncertaintyNanos() ? clock.getBiasUncertaintyNanos() : "",
+                        clock.hasDriftNanosPerSecond() ? clock.getDriftNanosPerSecond() : "",
+                        clock.hasDriftUncertaintyNanosPerSecond()
+                                ? clock.getDriftUncertaintyNanosPerSecond()
+                                : "",
+                        clock.getHardwareClockDiscontinuityCount(),
+                        SystemClock.elapsedRealtime());
+        Result += clockStream;
+
+        for (GnssMeasurement measurement : eventArgs.getMeasurements()) {
+            String measurementStream =
+                    String.format(
+                            "Raw,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                            measurement.getConstellationType(),
+                            measurement.getSvid(),
+                            measurement.hasCarrierFrequencyHz() ? measurement.getCarrierFrequencyHz() : "",
+                            measurement.getTimeOffsetNanos(),
+                            measurement.getState(),
+                            measurement.getReceivedSvTimeNanos(),
+                            measurement.getReceivedSvTimeUncertaintyNanos(),
+                            measurement.getPseudorangeRateMetersPerSecond(),
+                            measurement.getPseudorangeRateUncertaintyMetersPerSecond(),
+                            measurement.getAccumulatedDeltaRangeState(),
+                            measurement.getAccumulatedDeltaRangeMeters(),
+                            measurement.getAccumulatedDeltaRangeUncertaintyMeters(),
+                            measurement.getCn0DbHz(),
+                            measurement.getMultipathIndicator(),
+                            measurement.hasSnrInDb() ? measurement.getSnrInDb() : "",
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                                    && measurement.hasAutomaticGainControlLevelDb()
+                                    ? measurement.getAutomaticGainControlLevelDb()
+                                    : "",
+                            measurement.getSvid());
+            Result += measurementStream;
+        }
+        socket.send(Result.getBytes(), 0);
+        System.out.println(new String(socket.recv(0)));
     }
 
     @Override

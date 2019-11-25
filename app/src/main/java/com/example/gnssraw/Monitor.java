@@ -116,10 +116,6 @@ public class Monitor {
         myContext = context;
     }
 
-    public LocationManager getMyLocationManager() {
-        return myLocationManager;
-    }
-
     public void Register() {
 
         if (ActivityCompat
@@ -130,24 +126,14 @@ public class Monitor {
         }
         myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, REQUEST_TIME, 0.0f, myLocationListener);
         myLocationManager.registerGnssMeasurementsCallback(GnssListener);
+        myLocationManager.registerGnssNavigationMessageCallback(GnssNavigationMessageListener);
     }
 
     public void stopRegister(){
 
         myLocationManager.removeUpdates(myLocationListener);
         myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
-    }
-
-    public void setRequestTime(int input){
-        this.REQUEST_TIME = input * 1000;
-    }
-
-    public int PrintReQuestTime(){
-        return REQUEST_TIME;
-    }
-
-    public List<IListener> getListeners(){
-        return this.RawLoggers;
+        myLocationManager.unregisterGnssNavigationMessageCallback(GnssNavigationMessageListener);
     }
 
     public void addServerCommunication(IListener... loggers){

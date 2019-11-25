@@ -8,4 +8,5 @@
     <string name="acquisition_rate">Acquisition Rate</string>
     <string name="change_ar_btn">SET</string>
     <string name="version_of_app">0.1</string>
+    <string name="serverloggeractive">ServerLoggerActive</string>
 </resources>

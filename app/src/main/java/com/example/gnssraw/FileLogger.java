@@ -25,25 +25,26 @@ import java.util.Date;
 public class FileLogger implements IListener {
 
 
-    File myFile;
-    BufferedWriter myFileWriter;
+    private File myFileRaw, myFileFix, myFileNav;
+    private BufferedWriter myFileWriterRaw, myFileWriterFix, myFileWriterNav;
     private Context myContext;
     private final String DIR_NAME = "GnssRAW";
-    private final String F_NAME = "GNSS_log_RAW_";
+    private final String F_NAME_RAW = "GNSS_log_RAW_";
+    private final String F_NAME_FIX = "GNSS_log_FIX_";
+    private final String F_NAME_NAV = "GNSS_log_NAV_";
     private static final String COMMENT = "# ";
-    private static final char RECORD_DELIMITER = ',';
     private static final String VERSION_TAG = "Version: ";
 
     public FileLogger(Context context){
         myContext = context;
     }
 
-    public void CreateLoggerFile(){
+    public void CreateRAWLoggerFile(){
         File baseDirectory;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME); // Non per forza SD, che android vede come esterna(non privata)
-            baseDirectory.mkdirs(); // crea anche cartelle a cascata
+            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory.mkdirs();
         } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
             return;
@@ -54,7 +55,7 @@ public class FileLogger implements IListener {
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         Date now = new Date();
-        String fName =  String.format("%s_%s.txt", F_NAME , formatter.format(now));
+        String fName =  String.format("%s_%s.txt", F_NAME_RAW , formatter.format(now));
 
         File curFile = new File(baseDirectory, fName);
 
@@ -70,17 +71,19 @@ public class FileLogger implements IListener {
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
-            currentFileWriter.write("Header Description: GnssRAW.apk");
+            currentFileWriter.write("Header: GnssRAW.apk");
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
-            currentFileWriter.write(VERSION_TAG);
+            currentFileWriter.write(VERSION_TAG + "0.1");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
             String manufacturer = Build.MANUFACTURER;
             String model = Build.MODEL;
-            String fileVersion =
-                    myContext.getString(R.string.version_of_app)
-                            + " Platform: "
+            String platform =" Platform: "
                             + Build.VERSION.RELEASE
                             + " "
                             + "Manufacturer: "
@@ -88,22 +91,92 @@ public class FileLogger implements IListener {
                             + " "
                             + "Model: "
                             + model;
-            currentFileWriter.write(fileVersion);
+            currentFileWriter.write(platform);
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.write(
-                    "Raw,ElapsedRealtimeMillis,TimeNanos,LeapSecond,TimeUncertaintyNanos,FullBiasNanos,"
+                    "Clk,ElapsedRealtimeMillis,LeapSecond,TimeNanos,TimeUncertaintyNanos,FullBiasNanos,"
                             + "BiasNanos,BiasUncertaintyNanos,DriftNanosPerSecond,DriftUncertaintyNanosPerSecond,"
-                            + "HardwareClockDiscontinuityCount,Svid,TimeOffsetNanos,State,ReceivedSvTimeNanos,"
-                            + "ReceivedSvTimeUncertaintyNanos,Cn0DbHz,PseudorangeRateMetersPerSecond,"
-                            + "PseudorangeRateUncertaintyMetersPerSecond,"
-                            + "AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,"
-                            + "AccumulatedDeltaRangeUncertaintyMeters,CarrierFrequencyHz,CarrierCycles,"
-                            + "CarrierPhase,CarrierPhaseUncertainty,MultipathIndicator,SnrInDb,"
-                            + "ConstellationType,AgcDb,CarrierFrequencyHz");
+                            + "HardwareClockDiscontinuityCount,ElapsedRealtimeMillis");
             currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write("Raw,ConstellationType,Svid,CarrierFrequencyHz,TimeOffsetNanos,State,ReceivedSvTimeNanos,"
+                                    +"ReceivedSvTimeUncertaintyNanos,PseudorangeRateMetersPerSecond,PseudorangeRateUncertaintyMetersPerSecond,"
+                                    +"AccumulatedDeltaRangeState,AccumulatedDeltaRangeMeters,AccumulatedDeltaRangeUncertaintyMeters,Cn0DbHz,MultipathIndicator,SnrInDb,Svid");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+
+            myFileRaw = curFile;
+            myFileWriterRaw = currentFileWriter;
+
+            myFileWriterRaw.newLine();
+            myFileWriterRaw.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void CreateFIXLoggerFile(){
+        File baseDirectory;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory.mkdirs();
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
+            return;
+        } else {
+            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
+            return;
+        }
+
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        Date now = new Date();
+        String fName =  String.format("%s_%s.txt", F_NAME_FIX , formatter.format(now));
+
+        File curFile = new File(baseDirectory, fName);
+
+        String currentFilePath = curFile.getAbsolutePath();
+        BufferedWriter currentFileWriter;
+        try {
+            currentFileWriter = new BufferedWriter(new FileWriter(curFile));
+        } catch (Exception e) {
+            System.out.println("Could not open file: " + currentFilePath);
+            return;
+        }
+        try {
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write("Header: GnssRAW.apk");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write(VERSION_TAG + "0.1");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            String manufacturer = Build.MANUFACTURER;
+            String model = Build.MODEL;
+            String platform =" Platform: "
+                    + Build.VERSION.RELEASE
+                    + " "
+                    + "Manufacturer: "
+                    + manufacturer
+                    + " "
+                    + "Model: "
+                    + model;
+            currentFileWriter.write(platform);
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
@@ -113,26 +186,117 @@ public class FileLogger implements IListener {
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
+
+            myFileFix = curFile;
+            myFileWriterFix = currentFileWriter;
+
+            myFileWriterFix.newLine();
+            myFileWriterFix.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void CreateNAVLoggerFile(){
+        File baseDirectory;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory.mkdirs();
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
+            return;
+        } else {
+            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
+            return;
+        }
+
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        Date now = new Date();
+        String fName =  String.format("%s_%s.txt", F_NAME_NAV , formatter.format(now));
+
+        File curFile = new File(baseDirectory, fName);
+
+        String currentFilePath = curFile.getAbsolutePath();
+        BufferedWriter currentFileWriter;
+        try {
+            currentFileWriter = new BufferedWriter(new FileWriter(curFile));
+        } catch (Exception e) {
+            System.out.println("Could not open file: " + currentFilePath);
+            return;
+        }
+        try {
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write("Header: GnssRAW.apk");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.write(VERSION_TAG + "0.1");
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            String manufacturer = Build.MANUFACTURER;
+            String model = Build.MODEL;
+            String platform =" Platform: "
+                    + Build.VERSION.RELEASE
+                    + " "
+                    + "Manufacturer: "
+                    + manufacturer
+                    + " "
+                    + "Model: "
+                    + model;
+            currentFileWriter.write(platform);
+            currentFileWriter.newLine();
+            currentFileWriter.write(COMMENT);
+            currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.write("Nav,Svid,Type,Status,MessageId,Sub-messageId,Data(Bytes)");
             currentFileWriter.newLine();
             currentFileWriter.write(COMMENT);
             currentFileWriter.newLine();
 
-        myFile = curFile;
-        myFileWriter = currentFileWriter;
+            myFileNav = curFile;
+            myFileWriterNav = currentFileWriter;
 
-            myFileWriter.newLine();
+            myFileWriterNav.newLine();
+            myFileWriterNav.flush();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
 
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onLocationChanged(Location location) {
+        if (myFileWriterRaw == null) {
+            return;
+        }
+        String fixStream;
+        fixStream = String.format(
+                "Fix,%s,%f,%f,%f,%f,%f,%d",
+                location.getProvider(),
+                location.getLatitude(),
+                location.getLongitude(),
+                location.getAltitude(),
+                location.getSpeed(),
+                location.getAccuracy(),
+                location.getTime());
+        try {
+            myFileWriterFix.write(fixStream);
+            myFileWriterFix.newLine();
+            myFileWriterFix.flush();
+        } catch (IOException e) {
+        }
 
     }
 
@@ -153,7 +317,7 @@ public class FileLogger implements IListener {
 
     @Override
     public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
-        if (myFileWriter == null) {
+        if (myFileWriterRaw == null) {
             return;
         }
         GnssClock gnssClock = eventArgs.getClock();
@@ -170,7 +334,33 @@ public class FileLogger implements IListener {
 
     @Override
     public void onGnssNavigationMessageReceived(GnssNavigationMessage event) {
+        if (myFileWriterNav == null) {
+            return;
+        }
+        StringBuilder builder = new StringBuilder("Nav");
+        builder.append(",");
+        builder.append(event.getSvid());
+        builder.append(",");
+        builder.append(event.getType());
+        builder.append(",");
 
+        int status = event.getStatus();
+        builder.append(status);
+        builder.append(",");
+        builder.append(event.getMessageId());
+        builder.append(",");
+        builder.append(event.getSubmessageId());
+        byte[] data = event.getData();
+        for (byte word : data) {
+            builder.append(",");
+            builder.append(word);
+        }
+        try {
+            myFileWriterNav.write(builder.toString());
+            myFileWriterNav.newLine();
+            myFileWriterNav.flush();
+        } catch (IOException e) {
+        }
     }
 
     @Override
@@ -216,8 +406,8 @@ public class FileLogger implements IListener {
                                 : "",
                         clock.getHardwareClockDiscontinuityCount(),
                         SystemClock.elapsedRealtime());
-        myFileWriter.write(clockStream);
-        myFileWriter.newLine();
+        myFileWriterRaw.write(clockStream);
+        myFileWriterRaw.newLine();
 
         for (GnssMeasurement measurement : measurements.getMeasurements()) {
             String measurementStream =
@@ -243,11 +433,11 @@ public class FileLogger implements IListener {
                                     ? measurement.getAutomaticGainControlLevelDb()
                                     : "",
                             measurement.getSvid());
-            myFileWriter.write(measurementStream);
-            myFileWriter.newLine();
+            myFileWriterRaw.write(measurementStream);
+            myFileWriterRaw.newLine();
         }
 
-        myFileWriter.flush();
+        myFileWriterRaw.flush();
     }
 
 }

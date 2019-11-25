@@ -43,7 +43,7 @@ public class UILogger implements IListener {
 
     @Override
     public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
-        StringBuilder builder = new StringBuilder("[ GnssMeasurementsEvent:\n\n");
+        StringBuilder builder = new StringBuilder("GnssMeasurementsEvent{\n\n");
 
         builder.append(toStringClock(eventArgs.getClock()));
         builder.append("\n");
@@ -53,9 +53,12 @@ public class UILogger implements IListener {
             builder.append("\n");
         }
 
-        builder.append("]");
+        builder.append("}");
         getMeasurementEvent("onGnsssMeasurementsReceived: " + builder.toString());
+    }
 
+    private void getMeasurementEvent(String event) {
+        myFragment.writeOnTextFragment(event);
     }
 
     @Override
@@ -235,8 +238,6 @@ public class UILogger implements IListener {
         return builder.toString();
     }
 
-    private void getMeasurementEvent(String event) {
-        myFragment.writeOnTextFragment(event);
-    }
+
 
 }
