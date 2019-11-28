@@ -21,8 +21,11 @@ public class Monitor {
     public static final String TAG = "Monitor";
     private Context myContext;
     private int REQUEST_TIME = 1000;
-
+    private SensorMonitor mySensorMonitor;
     private List<IListener> RawLoggers;
+    boolean flag = false;
+    boolean sensorflag = false;
+    boolean serverflag = false;
 
     LocationManager myLocationManager;
     LocationListener myLocationListener =
@@ -60,6 +63,15 @@ public class Monitor {
     private final GnssMeasurementsEvent.Callback GnssListener = new GnssMeasurementsEvent.Callback() {
         @Override
         public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
+            if(!flag && sensorflag) {
+                mySensorMonitor.Register();
+                flag = true;
+            }
+            ServerLogger temp = (ServerLogger) getServerLogger();
+            if(temp != null && !serverflag){
+                temp.setDate();
+                serverflag = true;
+            }
             for (IListener Logger : RawLoggers) {
                 Logger.onGnssMeasurementsReceived(eventArgs);
             }
@@ -110,13 +122,13 @@ public class Monitor {
     };
 
     public Monitor(Context context, IListener... Loggers) {
-
+        myContext = context;
         this.RawLoggers = Arrays.asList(Loggers);
         myLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        myContext = context;
+        mySensorMonitor = new SensorMonitor(myContext);
     }
 
-    public void Register() {
+    public void Register(boolean flag) {
 
         if (ActivityCompat
                 .checkSelfPermission(myContext,Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -124,6 +136,8 @@ public class Monitor {
                     .checkSelfPermission(myContext,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        this.sensorflag = flag;
+
         myLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, REQUEST_TIME, 0.0f, myLocationListener);
         myLocationManager.registerGnssMeasurementsCallback(GnssListener);
         myLocationManager.registerGnssNavigationMessageCallback(GnssNavigationMessageListener);
@@ -134,6 +148,9 @@ public class Monitor {
         myLocationManager.removeUpdates(myLocationListener);
         myLocationManager.unregisterGnssMeasurementsCallback(GnssListener);
         myLocationManager.unregisterGnssNavigationMessageCallback(GnssNavigationMessageListener);
+        mySensorMonitor.stopRegister();
+        flag = false;
+        serverflag = false;
     }
 
     public void addServerCommunication(IListener... loggers){
@@ -143,6 +160,18 @@ public class Monitor {
 
     public void removeServerCommunication(IListener... loggers){
         this.RawLoggers = Arrays.asList(loggers);
+    }
+
+    public IListener getServerLogger(){
+//        for (IListener list: RawLoggers) {
+//            if(list.equals("ServerLogger")){
+//                return list;
+//            }
+//        }
+        if(RawLoggers.size() == 3){
+            return RawLoggers.get(2);
+        }
+        return null;
     }
 
 }

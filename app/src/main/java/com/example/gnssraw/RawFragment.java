@@ -3,6 +3,7 @@ package com.example.gnssraw;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,9 @@ public class RawFragment extends Fragment {
     private Monitor myMonitor;
     private ServerLogger myServerLogger;
     private SensorMonitor mySensorMonitor;
+    private Context myContext;
+    private MainActivity tempMainActivity;
+
 
     public RawFragment() {
 
@@ -43,15 +47,15 @@ public class RawFragment extends Fragment {
         myFileLogger = new FileLogger(this.getContext());
         myMonitor = new Monitor(Objects.requireNonNull(this.getContext()), myUILogger,myFileLogger);
         mySensorMonitor = new SensorMonitor(this.getContext());
+        tempMainActivity = (MainActivity) getActivity();
         Button start = (Button) newView.findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                myMonitor.Register();
+                myMonitor.Register(tempMainActivity.sensorflag);
                 myFileLogger.CreateRAWLoggerFile();
                 myFileLogger.CreateFIXLoggerFile();
                 myFileLogger.CreateNAVLoggerFile();
-                mySensorMonitor.Register();
             }
         });
         Button stop = (Button) newView.findViewById(R.id.stopButton);
@@ -59,7 +63,6 @@ public class RawFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 myMonitor.stopRegister();
-                mySensorMonitor.stopRegister();
             }
         });
 
@@ -101,12 +104,17 @@ public class RawFragment extends Fragment {
         return myMonitor;
     }
 
-    void ServerConnect(){
+    boolean ServerConnect(){
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        Date now = new Date();
-        myServerLogger = new ServerLogger(formatter.format(now));
-        myMonitor.addServerCommunication(myUILogger,myFileLogger,myServerLogger);
+//        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+//        Date now = new Date();
+        myServerLogger = new ServerLogger();
+        if(myServerLogger.checkConnection()) {
+            myMonitor.addServerCommunication(myUILogger, myFileLogger, myServerLogger);
+            return true;
+        } else{
+            return false;
+        }
     }
 
     void ServerDisconnect(){

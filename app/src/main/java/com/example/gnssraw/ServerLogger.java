@@ -1,6 +1,7 @@
 package com.example.gnssraw;
 
 
+import android.annotation.SuppressLint;
 import android.location.GnssClock;
 import android.location.GnssMeasurement;
 import android.location.GnssMeasurementsEvent;
@@ -13,6 +14,7 @@ import android.os.SystemClock;
 
 import org.jeromq.ZMQ;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
@@ -23,12 +25,12 @@ public class ServerLogger implements IListener{
     private ZMQ.Context context;
     private ZMQ.Socket socket;
     String log_date;
+    private final String ConnectionString = "tcp://192.168.1.187:5555";
 
-    public ServerLogger(String now) {
+    public ServerLogger() {
         context = ZMQ.context(1);
         socket = context.socket(ZMQ.REQ);
-        socket.connect("tcp://192.168.1.187:5555");
-        log_date = now;
+        //socket.connect();
     }
 
     @Override
@@ -53,7 +55,6 @@ public class ServerLogger implements IListener{
 
     @Override
     public void onGnssMeasurementsReceived(GnssMeasurementsEvent eventArgs) {
-
         String Result = Build.MANUFACTURER + Build.MODEL +log_date.toString()+"#";
         GnssClock clock = eventArgs.getClock();
         String clockStream =
@@ -137,5 +138,16 @@ public class ServerLogger implements IListener{
     @Override
     public void onSatelliteStatusChanged(GnssStatus status) {
 
+    }
+
+    public void setDate(){
+
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        Date now = new Date();
+        log_date = formatter.format(now);
+    }
+
+    public boolean checkConnection(){
+        return this.socket.connect(ConnectionString);
     }
 }

@@ -34,13 +34,13 @@ public class SensorMonitor {
     private final String F_NAME_RAW = "GNSS_log_SENSOR_";
     File myFileSensor;
     BufferedWriter myFileWriterSensor;
+    private long last_update = 0;
 
 
     public SensorMonitor(Context myContext) {
         this.myContext = myContext;
-        mySensorManager = (SensorManager) myContext.getSystemService(Context.SENSOR_SERVICE);
+        mySensorManager = (SensorManager) this.myContext.getSystemService(Context.SENSOR_SERVICE);
         myAccelerometer = mySensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        writeSensorFile();
     }
 
     private void writeSensorFile(){
@@ -71,31 +71,44 @@ public class SensorMonitor {
             System.out.println("Could not open file: " + currentFilePath);
             return;
         }
+        try {
+            currentFileWriter.write("#SensorEvent:timestamp, accuracy, A-Gx(x-axis), A-Gx(y-axis), A-Gx(z-axis)");
+            currentFileWriter.newLine();
+            currentFileWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         myFileSensor = curFile;
         myFileWriterSensor = currentFileWriter;
+
+
     }
 
     SensorEventListener mySensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            StringBuilder builder = new StringBuilder("SensorEvent");
-            builder.append(",");
-            builder.append(sensorEvent.sensor);
-            builder.append(",");
-            builder.append(sensorEvent.timestamp);
-            builder.append(",");
-            builder.append(sensorEvent.accuracy);
-            for (float value : sensorEvent.values) {
-                builder.append(",");
-                builder.append(value);
-            }
 
-            try {
-                myFileWriterSensor.write(builder.toString());
-                myFileWriterSensor.newLine();
-                myFileWriterSensor.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
+            long curTime = System.currentTimeMillis();
+
+            if ((curTime - last_update) >= 1000) {
+                last_update = curTime;
+                StringBuilder builder = new StringBuilder("SensorEvent:");
+                builder.append(sensorEvent.timestamp);
+                builder.append(",");
+                builder.append(sensorEvent.accuracy);
+                for (float value : sensorEvent.values) {
+                    builder.append(",");
+                    builder.append(value);
+                }
+
+                try {
+                    myFileWriterSensor.write(builder.toString());
+                    myFileWriterSensor.newLine();
+                    myFileWriterSensor.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -106,10 +119,12 @@ public class SensorMonitor {
     };
 
     public void Register() {
-        mySensorManager.registerListener(mySensorListener, myAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        writeSensorFile();
+        mySensorManager.registerListener(mySensorListener, myAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     public void stopRegister(){
+        last_update = 0;
         mySensorManager.unregisterListener(mySensorListener);
     }
 

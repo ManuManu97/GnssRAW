@@ -25,5 +25,16 @@
         android:visible="true"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/sensorsetterlogger"
+        android:checkable="true"
+        android:checked="false"
+        android:enabled="true"
+        android:iconTint="@color/whiteMan"
+        android:menuCategory="container"
+        android:title="SensorLoggerActive"
+        android:visible="true"
+        app:showAsAction="never" />
+
 
 </menu>

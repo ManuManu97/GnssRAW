@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     };
     private static final int LOCATION_REQUEST_ID = 1;
     private SectionsPagerAdapter sectionsPagerAdapter;
+    public boolean sensorflag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         if(id == R.id.serversetterlogger){
             setServerLoggerStatus(item);
+            return true;
+        }
+
+        if(id == R.id.sensorsetterlogger){
+            setSensorLoggerStatus(item);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -164,10 +170,25 @@ public class MainActivity extends AppCompatActivity {
     public void setServerLoggerStatus(MenuItem item){
         RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
         if(!item.isChecked()){
-            temp.ServerConnect();
-            item.setChecked(true);
+            if(temp.ServerConnect()){
+                item.setChecked(true);
+            }else{
+                Toast.makeText(MainActivity.this, "Impossibile connettersi al server.", Toast.LENGTH_SHORT).show();
+            }
+
         }else{
             temp.ServerDisconnect();
+            item.setChecked(false);
+        }
+    }
+
+    public void setSensorLoggerStatus(MenuItem item){
+        RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
+        if(!item.isChecked()){
+            sensorflag = true;
+            item.setChecked(true);
+        }else{
+            sensorflag = false;
             item.setChecked(false);
         }
     }
