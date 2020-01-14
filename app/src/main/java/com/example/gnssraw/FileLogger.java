@@ -43,7 +43,7 @@ public class FileLogger implements IListener {
         File baseDirectory;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
             baseDirectory.mkdirs();
         } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
@@ -128,7 +128,7 @@ public class FileLogger implements IListener {
         File baseDirectory;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
             baseDirectory.mkdirs();
         } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
@@ -204,7 +204,7 @@ public class FileLogger implements IListener {
         File baseDirectory;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
             baseDirectory.mkdirs();
         } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");

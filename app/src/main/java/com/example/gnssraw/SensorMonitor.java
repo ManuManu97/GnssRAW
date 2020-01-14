@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static androidx.core.content.ContextCompat.getExternalFilesDirs;
+
 public class SensorMonitor {
 
     public static final String TAG = "SensorMonitor";
@@ -47,7 +49,7 @@ public class SensorMonitor {
         File baseDirectory;
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(Environment.getExternalStorageDirectory(), DIR_NAME);
+            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
             baseDirectory.mkdirs();
         } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
