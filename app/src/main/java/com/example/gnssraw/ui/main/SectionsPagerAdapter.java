@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.example.gnssraw.PlotFragment;
 import com.example.gnssraw.R;
 import com.example.gnssraw.RawFragment;
+import com.example.gnssraw.SettingsFrag;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
@@ -20,10 +21,11 @@ import com.example.gnssraw.RawFragment;
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @StringRes
-    private static final int[] TAB_TITLES = new int[]{R.string.raw_tab, R.string.plot_tab};
+    private static final int[] TAB_TITLES = new int[]{R.string.raw_tab, R.string.plot_tab, R.string.settings_tab};
     private final Context mContext;
-    RawFragment myRawFragment = new RawFragment();
-    PlotFragment myPlotFragment = new PlotFragment();
+    private RawFragment myRawFragment = new RawFragment();
+    private PlotFragment myPlotFragment = new PlotFragment();
+    private SettingsFrag mySettingsFragment = new SettingsFrag();
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -40,6 +42,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
                 return myRawFragment;
             case 1:
                 return myPlotFragment;
+            case 2:
+                return mySettingsFragment;
             default:
                 return null;
         }
@@ -53,7 +57,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        // Show 2 total pages.
-        return 2;
+        return 3;
     }
 }

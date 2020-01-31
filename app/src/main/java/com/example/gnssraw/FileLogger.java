@@ -2,16 +2,19 @@ package com.example.gnssraw;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.location.GnssClock;
 import android.location.GnssMeasurement;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -52,6 +55,15 @@ public class FileLogger implements IListener {
             Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
             return;
         }
+
+       /* Uri prova;
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("directory");
+        intent.putExtra(intent.EXTRA_TITLE, "GnssRAW");
+        String s = DocumentsContract.EXTRA_INITIAL_URI;
+        prova = Uri.parse(DocumentsContract.EXTRA_INITIAL_URI);
+        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, prova);*/
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
         Date now = new Date();

@@ -37,12 +37,18 @@ public class SensorMonitor {
     File myFileSensor;
     BufferedWriter myFileWriterSensor;
     private long last_update = 0;
+    private Sensor myPressure;
+    private Sensor myGyroscope;
 
 
     public SensorMonitor(Context myContext) {
         this.myContext = myContext;
         mySensorManager = (SensorManager) this.myContext.getSystemService(Context.SENSOR_SERVICE);
         myAccelerometer = mySensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        String s = mySensorManager.getSensorList(Sensor.TYPE_GYROSCOPE).toString();
+        myGyroscope = mySensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+       // myPressure = mySensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+
     }
 
     private void writeSensorFile(){
@@ -95,7 +101,8 @@ public class SensorMonitor {
 
             if ((curTime - last_update) >= 1000) {
                 last_update = curTime;
-                StringBuilder builder = new StringBuilder("SensorEvent:");
+                StringBuilder builder = new StringBuilder("SensorEvent ");
+                builder.append(sensorEvent.sensor.getName()+": ");
                 builder.append(sensorEvent.timestamp);
                 builder.append(",");
                 builder.append(sensorEvent.accuracy);
@@ -123,6 +130,9 @@ public class SensorMonitor {
     public void Register() {
         writeSensorFile();
         mySensorManager.registerListener(mySensorListener, myAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+        mySensorManager.registerListener(mySensorListener,myGyroscope,SensorManager.SENSOR_DELAY_FASTEST);
+       // mySensorManager.registerListener(mySensorListener, myPressure, 1000);
+
     }
 
     public void stopRegister(){

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -66,17 +67,24 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.serversetterlogger){
-            setServerLoggerStatus(item);
-            return true;
+
+        switch (item.getItemId()) {
+
+            case R.id.serversetterlogger:
+                setServerLoggerStatus(item);
+                return true;
+
+            case R.id.sensorsetterlogger:
+                setSensorLoggerStatus(item);
+                return true;
+
+            case R.id.settings_option:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        if(id == R.id.sensorsetterlogger){
-            setSensorLoggerStatus(item);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
