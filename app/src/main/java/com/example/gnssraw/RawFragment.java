@@ -45,17 +45,20 @@ public class RawFragment extends Fragment {
         mScrollTextView = newView.findViewById(R.id.RawscrollView);
         myUILogger = new UILogger(mRawTextView, this);
         myFileLogger = new FileLogger(this.getContext());
-        myMonitor = new Monitor(Objects.requireNonNull(this.getContext()), myUILogger,myFileLogger);
         mySensorMonitor = new SensorMonitor(this.getContext());
+        myMonitor = new Monitor(Objects.requireNonNull(this.getContext()), mySensorMonitor, myUILogger,myFileLogger);
         tempMainActivity = (MainActivity) getActivity();
         Button start = (Button) newView.findViewById(R.id.startButton);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+                Date now = new Date();
+                myFileLogger.CreateRAWLoggerFile(formatter.format(now));
+                myFileLogger.CreateFIXLoggerFile(formatter.format(now));
+                myFileLogger.CreateNAVLoggerFile(formatter.format(now));
+                mySensorMonitor.writeSensorFile(formatter.format(now));
                 myMonitor.Register(tempMainActivity.sensorflag);
-                myFileLogger.CreateRAWLoggerFile();
-                myFileLogger.CreateFIXLoggerFile();
-                myFileLogger.CreateNAVLoggerFile();
             }
         });
         Button stop = (Button) newView.findViewById(R.id.stopButton);

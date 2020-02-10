@@ -1,21 +1,13 @@
 package com.example.gnssraw;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
-import android.hardware.SensorAdditionalInfo;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventCallback;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.LocationManager;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
-
-import androidx.core.app.ActivityCompat;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -24,8 +16,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static androidx.core.content.ContextCompat.getExternalFilesDirs;
-
 public class SensorMonitor {
 
     public static final String TAG = "SensorMonitor";
@@ -33,8 +23,14 @@ public class SensorMonitor {
     private SensorManager mySensorManager;
     private Sensor myAccelerometer;
     private final String DIR_NAME = "GnssRAW";
+    private final String SENSOR_DIR_NAME = "Sensor Measurements";
     private final String F_NAME_RAW = "GNSS_log_SENSOR_";
     File myFileSensor;
+
+    public void setMyFileWriterSensor(BufferedWriter myFileWriterSensor) {
+        this.myFileWriterSensor = myFileWriterSensor;
+    }
+
     BufferedWriter myFileWriterSensor;
     private long last_update = 0;
     private Sensor myPressure;
@@ -44,30 +40,17 @@ public class SensorMonitor {
     public SensorMonitor(Context myContext) {
         this.myContext = myContext;
         mySensorManager = (SensorManager) this.myContext.getSystemService(Context.SENSOR_SERVICE);
+        assert mySensorManager != null;
         myAccelerometer = mySensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         String s = mySensorManager.getSensorList(Sensor.TYPE_GYROSCOPE).toString();
         myGyroscope = mySensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-       // myPressure = mySensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
 
     }
 
-    private void writeSensorFile(){
-        File baseDirectory;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
-            baseDirectory.mkdirs();
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
-            return;
-        } else {
-            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
-            return;
-        }
+    public void writeSensorFile(String date){
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        Date now = new Date();
-        String fName =  String.format("%s_%s.txt", F_NAME_RAW , formatter.format(now));
+        File baseDirectory = makeSensorDirectory(date);
+        String fName =  String.format("%s_%s.txt", F_NAME_RAW , date);
 
         File curFile = new File(baseDirectory, fName);
 
@@ -79,6 +62,8 @@ public class SensorMonitor {
             System.out.println("Could not open file: " + currentFilePath);
             return;
         }
+
+
         try {
             currentFileWriter.write("#SensorEvent:timestamp, accuracy, A-Gx(x-axis), A-Gx(y-axis), A-Gx(z-axis)");
             currentFileWriter.newLine();
@@ -88,8 +73,7 @@ public class SensorMonitor {
         }
 
         myFileSensor = curFile;
-        myFileWriterSensor = currentFileWriter;
-
+        setMyFileWriterSensor(currentFileWriter);
 
     }
 
@@ -128,7 +112,6 @@ public class SensorMonitor {
     };
 
     public void Register() {
-        writeSensorFile();
         mySensorManager.registerListener(mySensorListener, myAccelerometer, SensorManager.SENSOR_DELAY_FASTEST);
         mySensorManager.registerListener(mySensorListener,myGyroscope,SensorManager.SENSOR_DELAY_FASTEST);
        // mySensorManager.registerListener(mySensorListener, myPressure, 1000);
@@ -139,5 +122,27 @@ public class SensorMonitor {
         last_update = 0;
         mySensorManager.unregisterListener(mySensorListener);
     }
+
+    private File makeSensorDirectory(String date){
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            String path = myContext.getExternalFilesDir(null).getParent().split("Android")[0];
+            File rootDirectory = new File(path, DIR_NAME);
+            File recordDirectory = new File(rootDirectory.getAbsolutePath(), "Record "+ date);
+            File sensorDirectory = new File(recordDirectory.getAbsolutePath(), SENSOR_DIR_NAME);
+            if(sensorDirectory.mkdirs()){
+                return sensorDirectory;
+            }else
+                return null;
+
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
+            return null;
+        } else {
+            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
+            return null ;
+        }
+    }
+
 
 }
