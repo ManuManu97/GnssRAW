@@ -283,7 +283,6 @@ public class FileLogger implements IListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-       // Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
 
     }
 
