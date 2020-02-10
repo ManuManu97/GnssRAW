@@ -2,19 +2,16 @@ package com.example.gnssraw;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.location.GnssClock;
 import android.location.GnssMeasurement;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
-import android.provider.DocumentsContract;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -42,34 +39,18 @@ public class FileLogger implements IListener {
         myContext = context;
     }
 
-    public void CreateRAWLoggerFile(){
-        File baseDirectory;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
-            baseDirectory.mkdirs();
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
+    public void CreateRAWLoggerFile(String date){
+
+        //@SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        //Date now = new Date();
+        String fName =  String.format("%s_%s.txt", F_NAME_RAW , date);
+        File curFile;
+        File baseDirectory = makeDirectory(date);
+
+        if(baseDirectory != null)
+            curFile = new File(baseDirectory, fName);
+        else
             return;
-        } else {
-            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
-            return;
-        }
-
-       /* Uri prova;
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("directory");
-        intent.putExtra(intent.EXTRA_TITLE, "GnssRAW");
-        String s = DocumentsContract.EXTRA_INITIAL_URI;
-        prova = Uri.parse(DocumentsContract.EXTRA_INITIAL_URI);
-        intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, prova);*/
-
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        Date now = new Date();
-        String fName =  String.format("%s_%s.txt", F_NAME_RAW , formatter.format(now));
-
-        File curFile = new File(baseDirectory, fName);
 
         String currentFilePath = curFile.getAbsolutePath();
         BufferedWriter currentFileWriter;
@@ -136,25 +117,19 @@ public class FileLogger implements IListener {
 
     }
 
-    public void CreateFIXLoggerFile(){
-        File baseDirectory;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
-            baseDirectory.mkdirs();
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
-            return;
-        } else {
-            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
-            return;
-        }
+    public void CreateFIXLoggerFile(String date){
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        Date now = new Date();
-        String fName =  String.format("%s_%s.txt", F_NAME_FIX , formatter.format(now));
+       // @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        //Date now = new Date();
+        String fName =  String.format("%s_%s.txt", F_NAME_FIX , date);
 
-        File curFile = new File(baseDirectory, fName);
+        File curFile;
+        File baseDirectory = makeDirectory(date);
+
+        if(baseDirectory != null)
+            curFile = new File(baseDirectory, fName);
+        else
+            return;
 
         String currentFilePath = curFile.getAbsolutePath();
         BufferedWriter currentFileWriter;
@@ -208,29 +183,22 @@ public class FileLogger implements IListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
 
     }
 
-    public void CreateNAVLoggerFile(){
-        File baseDirectory;
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            baseDirectory = new File(myContext.getExternalFilesDir(null), DIR_NAME);
-            baseDirectory.mkdirs();
-        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
-            return;
-        } else {
-            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
-            return;
-        }
+    public void CreateNAVLoggerFile(String date){
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        Date now = new Date();
-        String fName =  String.format("%s_%s.txt", F_NAME_NAV , formatter.format(now));
+        /*@SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+        Date now = new Date();*/
+        String fName =  String.format("%s_%s.txt", F_NAME_NAV , date);
 
-        File curFile = new File(baseDirectory, fName);
+        File curFile;
+        File baseDirectory = makeDirectory(date);
+
+        if(baseDirectory != null)
+            curFile = new File(baseDirectory, fName);
+        else
+            return;
 
         String currentFilePath = curFile.getAbsolutePath();
         BufferedWriter currentFileWriter;
@@ -283,7 +251,6 @@ public class FileLogger implements IListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
-       // Toast.makeText(myContext, "File opened: " + currentFilePath, Toast.LENGTH_SHORT).show();
 
     }
 
@@ -452,4 +419,23 @@ public class FileLogger implements IListener {
         myFileWriterRaw.flush();
     }
 
+    private File makeDirectory(String now){
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            String path = myContext.getExternalFilesDir(null).getParent().split("Android")[0];
+            File rootDirectory = new File(path, DIR_NAME);
+            if(!rootDirectory.exists())
+                rootDirectory.mkdirs();
+            File recordDirectory = new File(rootDirectory.getAbsolutePath(), "Record "+now);
+            if(!recordDirectory.exists())
+                recordDirectory.mkdirs();
+            return recordDirectory;
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            Log.e(this.getClass().getSimpleName(),"Cannot write to external storage.");
+            return null;
+        } else {
+            Log.e(this.getClass().getSimpleName(),"Cannot read external storage.");
+            return null ;
+        }
+    }
 }

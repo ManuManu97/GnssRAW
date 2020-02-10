@@ -3,6 +3,7 @@ package com.example.gnssraw;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.SensorManager;
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssNavigationMessage;
 import android.location.GnssStatus;
@@ -121,11 +122,11 @@ public class Monitor {
         }
     };
 
-    public Monitor(Context context, IListener... Loggers) {
+    public Monitor(Context context, SensorMonitor mySensorMonitor, IListener... Loggers) {
         myContext = context;
         this.RawLoggers = Arrays.asList(Loggers);
         myLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        mySensorMonitor = new SensorMonitor(myContext);
+        this.mySensorMonitor = mySensorMonitor;
     }
 
     public void Register(boolean flag) {
