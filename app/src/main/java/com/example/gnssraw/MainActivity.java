@@ -3,6 +3,7 @@ package com.example.gnssraw;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.gnssraw.ui.main.SectionsPagerAdapter;
@@ -30,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_REQUEST_ID = 1;
     private SectionsPagerAdapter sectionsPagerAdapter;
     public boolean sensorflag = false;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         checkPermissions();
     }
 
@@ -65,8 +69,11 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.settings_option:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
+                SettingsFrag sett = (SettingsFrag) sectionsPagerAdapter.getItem(2);
+
+                Toast.makeText(this,sett.getValues("signature"), Toast.LENGTH_LONG).show();
+                /*startActivity(new Intent(this, SettingsActivity.class));
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -119,47 +126,10 @@ public class MainActivity extends AppCompatActivity {
                     ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, LOCATION_REQUEST_ID);
                 }
             }else{
-                Toast.makeText(this,"Permessi Garantiti ", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this,"Permessi Garantiti ", Toast.LENGTH_SHORT).show();
             }
         }
     }
-
-  /*  private void showPopup(final Activity context) {
-        int popupWidth = 500;
-        int popupHeight = 500;
-
-        LinearLayout viewGroup = (LinearLayout) context.findViewById(R.id.popup);
-        LayoutInflater layoutInflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View layout = layoutInflater.inflate(R.layout.acquisition_rate_popup, viewGroup);
-
-        final PopupWindow popup = new PopupWindow(context);
-        popup.setContentView(layout);
-        popup.setWidth(popupWidth);
-        popup.setHeight(popupHeight);
-        popup.setFocusable(true);
-        popup.showAtLocation(layout, Gravity.CENTER, 0,  0);
-        Button close = (Button) layout.findViewById(R.id.set_ar_button);
-        final TextView setterAR = layout.findViewById(R.id.number_for_AR);
-        setterAR.setText("");
-        close.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
-                Monitor aux = temp.getMonitor();
-                try {
-                    int i = Integer.parseInt(setterAR.getText().toString());
-                    aux.setRequestTime(i);
-                    Toast.makeText(getApplicationContext(),""+aux.PrintReQuestTime()/1000+" Seconds", Toast.LENGTH_SHORT).show();
-                }catch (Exception e) {
-                    Toast.makeText(getApplicationContext(),"ERROR "+ e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-
-                popup.dismiss();
-            }
-        });
-    }*/
 
     public void setServerLoggerStatus(MenuItem item){
         RawFragment temp = (RawFragment) sectionsPagerAdapter.getItem(0);
@@ -186,4 +156,8 @@ public class MainActivity extends AppCompatActivity {
             item.setChecked(false);
         }
     }
+
+
+
+
 }

@@ -41,8 +41,6 @@ public class FileLogger implements IListener {
 
     public void CreateRAWLoggerFile(String date){
 
-        //@SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        //Date now = new Date();
         String fName =  String.format("%s_%s.txt", F_NAME_RAW , date);
         File curFile;
         File baseDirectory = makeDirectory(date);
@@ -118,9 +116,7 @@ public class FileLogger implements IListener {
     }
 
     public void CreateFIXLoggerFile(String date){
-
-       // @SuppressLint("SimpleDateFormat") SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        //Date now = new Date();
+        
         String fName =  String.format("%s_%s.txt", F_NAME_FIX , date);
 
         File curFile;

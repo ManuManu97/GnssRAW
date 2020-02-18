@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/server_connection">
-
-    <EditTextPreference
-        app:key="Insert address"
-        app:title="Server address"
-        app:useSimpleSummaryProvider="true" />
+    <PreferenceCategory android:title="@string/server_connection">
+        <EditTextPreference
+            android:id="@+id/edittextpreference"
+            android:defaultValue="true"
+            android:key="ip_address"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Server's ip address"
+            app:useSimpleSummaryProvider="true"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/sensor_settings">
         <MultiSelectListPreference
-            app:key="@string/sensor_settings"
+            app:key="sensors_list"
             app:entries="@array/sensor_values"
             app:entryValues="@array/sensor_values"
             app:title="Select Sensors"

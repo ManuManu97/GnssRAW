@@ -31,7 +31,7 @@ public class SensorMonitor {
         this.myFileWriterSensor = myFileWriterSensor;
     }
 
-    BufferedWriter myFileWriterSensor;
+    private BufferedWriter myFileWriterSensor;
     private long last_update = 0;
     private Sensor myPressure;
     private Sensor myGyroscope;
@@ -77,7 +77,7 @@ public class SensorMonitor {
 
     }
 
-    SensorEventListener mySensorListener = new SensorEventListener() {
+    private SensorEventListener mySensorListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
 
