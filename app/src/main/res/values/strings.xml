@@ -13,13 +13,13 @@
     <string name="title_activity_settings">Settings</string>
 
     <!-- Preference Titles -->
+    <string name="sharedvalues_key">Shared Value Key</string>
     <string name="server_connection">Connection Server settings</string>
     <string name="sensor_settings">Sensor settings</string>
 
 
     <!-- Messages Preferences -->
     <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
 
     <!-- Sensor Preferences-->
     <string name="sensor_one">Sensor one</string>

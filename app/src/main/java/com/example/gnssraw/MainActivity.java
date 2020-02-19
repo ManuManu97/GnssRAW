@@ -70,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.settings_option:
                 SettingsFrag sett = (SettingsFrag) sectionsPagerAdapter.getItem(2);
-
-                Toast.makeText(this,sett.getValues("signature"), Toast.LENGTH_LONG).show();
                 /*startActivity(new Intent(this, SettingsActivity.class));
                 return true;*/
             default:

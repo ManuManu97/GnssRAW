@@ -3,10 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/server_connection">
+
         <EditTextPreference
             android:id="@+id/edittextpreference"
             android:defaultValue="true"
-            android:key="ip_address"
+            android:key="ipaddress"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="Server's ip address"
@@ -16,7 +17,7 @@
 
     <PreferenceCategory app:title="@string/sensor_settings">
         <MultiSelectListPreference
-            app:key="sensors_list"
+            app:key="sensors"
             app:entries="@array/sensor_values"
             app:entryValues="@array/sensor_values"
             app:title="Select Sensors"

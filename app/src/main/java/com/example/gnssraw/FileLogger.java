@@ -116,7 +116,7 @@ public class FileLogger implements IListener {
     }
 
     public void CreateFIXLoggerFile(String date){
-        
+
         String fName =  String.format("%s_%s.txt", F_NAME_FIX , date);
 
         File curFile;
